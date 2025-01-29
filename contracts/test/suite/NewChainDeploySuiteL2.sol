@@ -10,7 +10,9 @@ import {PriceFeedStore} from "../../instance/PriceFeedStore.sol";
 import {IBytecodeRepository} from "../../interfaces/IBytecodeRepository.sol";
 import {IAddressProvider} from "../../interfaces/IAddressProvider.sol";
 import {IInstanceManager} from "../../interfaces/IInstanceManager.sol";
-import {ICreditConfigureActions} from "../../factories/CreditFactory.sol";
+import {IConfigureActions} from "../../factories/CreditFactory.sol";
+
+import {ERC20} from "@openzeppelin/contracts/token/ERC20/ERC20.sol";
 
 import {IWETH} from "@gearbox-protocol/core-v3/contracts/interfaces/external/IWETH.sol";
 import {IERC20} from "@openzeppelin/contracts/interfaces/IERC20.sol";
@@ -24,6 +26,7 @@ import {
     AP_RATE_KEEPER_FACTORY,
     AP_MARKET_CONFIGURATOR_FACTORY,
     AP_LOSS_POLICY_FACTORY,
+    AP_GEAR_TOKEN,
     AP_GOVERNOR,
     AP_POOL,
     AP_POOL_QUOTA_KEEPER,
@@ -71,32 +74,39 @@ import {CreditFacadeParams, CreditManagerParams} from "../../factories/CreditFac
 
 import {GlobalSetup} from "../../test/helpers/GlobalSetup.sol";
 
-contract NewChainDeploySuite is Test, GlobalSetup {
+contract NewChainDeploySuiteL2 is Test, GlobalSetup {
     address internal riskCurator;
 
-    address constant TREASURY = 0x3E965117A51186e41c2BB58b729A1e518A715e5F;
-    address constant WETH = 0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2;
-    address constant GEAR = 0xBa3335588D9403515223F109EdC4eB7269a9Ab5D;
-    address constant USDC = 0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48;
-    address constant CHAINLINK_ETH_USD = 0x5f4eC3Df9cbd43714FE2740f5E3616155c5b8419;
-    address constant CHAINLINK_USDC_USD = 0x8fFfFfd4AfB6115b954Bd326cbe7B4BA576818f6;
+    // Base contracts
+    // address constant TREASURY = 0x3E965117A51186e41c2BB58b729A1e518A715e5F;
+    address constant WETH = 0x4200000000000000000000000000000000000006;
+    // address constant GEAR = 0xBa3335588D9403515223F109EdC4eB7269a9Ab5D;
+    address constant USDC = 0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913;
+    address constant CHAINLINK_ETH_USD = 0x71041dddad3595F9CEd3DcCFBe3D1F4b0a16Bb70;
+    address constant CHAINLINK_USDC_USD = 0x7e860098F58bBFC8648a4311b374B1D669a2bc6B;
+    address GEAR;
+    address TREASURY;
 
     string constant name = "Test Market ETH";
     string constant symbol = "dETH";
 
     function setUp() public {
         // simulate chainId 1
-        if (block.chainid != 1) {
-            vm.chainId(1);
-        }
+        // if (block.chainid != 1) {
+        //     vm.chainId(1);
+        // }
+
+        TREASURY = vm.addr(_generatePrivateKey("TREASURY"));
+        GEAR = address(new ERC20("Gearbox", "GEAR"));
 
         _setUpInstanceManager();
-        _setUpGlobalContracts();
 
         // activate instance
         CrossChainCall[] memory calls = new CrossChainCall[](1);
-        calls[0] = _generateActivateCall(1, instanceOwner, TREASURY, WETH, GEAR);
+        calls[0] = _generateActivateCall(0, instanceOwner, TREASURY, WETH, GEAR);
         _submitAndSignOrExecuteProposal("Activate instance", calls);
+
+        _setUpGlobalContracts();
 
         // Configure instance
         _setupPriceFeedStore();
@@ -125,7 +135,7 @@ contract NewChainDeploySuite is Test, GlobalSetup {
 
         vm.startPrank(riskCurator);
         address mc = MarketConfiguratorFactory(mcf).createMarketConfigurator(
-            riskCurator, riskCurator, "Test Risk Curator", false
+            riskCurator, riskCurator, riskCurator, "Test Risk Curator", false
         );
 
         uint256 gasAfter = gasleft();
@@ -190,7 +200,7 @@ contract NewChainDeploySuite is Test, GlobalSetup {
         MarketConfigurator(mc).configureCreditSuite(
             cm,
             abi.encodeCall(
-                ICreditConfigureActions.allowAdapter, (DeployParams("BALANCER_VAULT", 0, abi.encode(cm, balancerVault)))
+                IConfigureActions.allowAdapter, (DeployParams("BALANCER_VAULT", 0, abi.encode(cm, balancerVault)))
             )
         );
 

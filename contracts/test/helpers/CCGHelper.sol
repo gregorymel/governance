@@ -93,24 +93,40 @@ contract CCGHelper is SignatureHelper {
         _stopPrankOrBroadcast();
     }
 
+    function _signProposal(SignedProposal memory partialyFilledProposal)
+        internal
+        view
+        returns (bytes32 proposalHash, bytes32 structHash, bytes memory signature1, bytes memory signature2)
+    {
+        proposalHash = multisig.hashProposal(
+            partialyFilledProposal.name, partialyFilledProposal.calls, partialyFilledProposal.prevHash
+        );
+
+        structHash = keccak256(
+            abi.encode(
+                PROPOSAL_TYPEHASH,
+                keccak256(bytes(partialyFilledProposal.name)),
+                proposalHash,
+                partialyFilledProposal.prevHash
+            )
+        );
+
+        signature1 = _sign(signer1Key, ECDSA.toTypedDataHash(_ccmDomainSeparator(), structHash));
+        signature2 = _sign(signer2Key, ECDSA.toTypedDataHash(_ccmDomainSeparator(), structHash));
+
+        return (proposalHash, structHash, signature1, signature2);
+    }
+
     function _signCurrentProposal() internal {
         bytes32[] memory currentProposalHashes = multisig.getCurrentProposalHashes();
 
         SignedProposal memory currentProposal = multisig.getProposal(currentProposalHashes[0]);
 
-        bytes32 proposalHash =
-            multisig.hashProposal(currentProposal.name, currentProposal.calls, currentProposal.prevHash);
-
-        bytes32 structHash = keccak256(
-            abi.encode(
-                PROPOSAL_TYPEHASH, keccak256(bytes(currentProposal.name)), proposalHash, currentProposal.prevHash
-            )
-        );
+        (bytes32 proposalHash, bytes32 structHash, bytes memory signature1, bytes memory signature2) =
+            _signProposal(currentProposal);
 
         console.log("tt");
         console.logBytes32(structHash);
-
-        bytes memory signature1 = _sign(signer1Key, ECDSA.toTypedDataHash(_ccmDomainSeparator(), structHash));
 
         multisig.signProposal(proposalHash, signature1);
 
@@ -122,7 +138,6 @@ contract CCGHelper is SignatureHelper {
         console.logBytes32(currentProposal.prevHash);
         console.log(signature1.toHexString());
 
-        bytes memory signature2 = _sign(signer2Key, ECDSA.toTypedDataHash(_ccmDomainSeparator(), structHash));
         multisig.signProposal(proposalHash, signature2);
 
         console.log("== SIGNER 2==");
@@ -135,6 +150,30 @@ contract CCGHelper is SignatureHelper {
     function _submitProposalAndSign(string memory name, CrossChainCall[] memory calls) internal {
         _submitProposal(name, calls);
         _signCurrentProposal();
+    }
+
+    function _signAndExecuteProposal(string memory name, CrossChainCall[] memory calls) internal {
+        SignedProposal memory signedProposal =
+            SignedProposal({name: name, calls: calls, prevHash: prevProposalHash, signatures: new bytes[](2)});
+
+        (,, bytes memory signature1, bytes memory signature2) = _signProposal(signedProposal);
+
+        signedProposal.signatures[0] = signature1;
+        signedProposal.signatures[1] = signature2;
+
+        multisig.executeProposal(signedProposal);
+        console.log("== EXECUTED ==");
+        console.logBytes32(multisig.lastProposalHash());
+        console.logBytes32(prevProposalHash);
+        prevProposalHash = multisig.lastProposalHash();
+    }
+
+    function _submitAndSignOrExecuteProposal(string memory name, CrossChainCall[] memory calls) internal {
+        if (block.chainid == 1) {
+            _submitProposalAndSign(name, calls);
+        } else {
+            _signAndExecuteProposal(name, calls);
+        }
     }
 
     function _ccmDomainSeparator() internal view returns (bytes32) {

@@ -145,12 +145,12 @@ contract GlobalSetup is Test, InstanceManagerHelper {
     }
 
     function _setUpGlobalContracts() internal {
-        _setUpInstanceManager();
+        // _setUpInstanceManager();
 
         CrossChainCall[] memory calls = new CrossChainCall[](1);
         calls[0] = _generateAddAuditorCall(auditor, "Initial Auditor");
 
-        _submitProposalAndSign("Add Auditor", calls);
+        _submitAndSignOrExecuteProposal("Add Auditor", calls);
 
         uint256 len = contractsToUpload.length;
 
@@ -163,7 +163,7 @@ contract GlobalSetup is Test, InstanceManagerHelper {
             calls[i] = _generateAllowSystemContractCall(bytecodeHash);
         }
 
-        _submitProposalAndSign("Allow system contracts", calls);
+        _submitAndSignOrExecuteProposal("Allow system contracts", calls);
 
         DeploySystemContractCall[10] memory deployCalls = [
             DeploySystemContractCall({contractType: AP_BOT_LIST, version: 3_10, saveVersion: false}),
@@ -187,7 +187,7 @@ contract GlobalSetup is Test, InstanceManagerHelper {
             );
         }
 
-        _submitProposalAndSign("System contracts", calls);
+        _submitAndSignOrExecuteProposal("System contracts", calls);
     }
 
     function _attachGlobalContracts() internal {
@@ -202,7 +202,7 @@ contract GlobalSetup is Test, InstanceManagerHelper {
     }
 
     function _exportJson() internal {
-         // Store address manager state as JSON
+        // Store address manager state as JSON
         string memory json = vm.serializeAddress("addresses", "instanceManager", address(instanceManager));
         json = vm.serializeAddress("addresses", "bytecodeRepository", address(bytecodeRepository));
         json = vm.serializeAddress("addresses", "multisig", address(multisig));
