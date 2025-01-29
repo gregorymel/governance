@@ -26,6 +26,8 @@ import {ProxyCall} from "../helpers/ProxyCall.sol";
 import {LibString} from "@solady/utils/LibString.sol";
 import {AddressProvider} from "./AddressProvider.sol";
 
+import {console} from "forge-std/console.sol";
+
 contract InstanceManager is Ownable, IInstanceManager {
     using LibString for string;
 
@@ -81,6 +83,7 @@ contract InstanceManager is Ownable, IInstanceManager {
     }
 
     function activate(address _instanceOwner, address _treasury, address _weth, address _gear) external onlyOwner {
+        console.log("== ACTIVATE ==", isActivated);
         if (!isActivated) {
             _transferOwnership(_instanceOwner);
 
