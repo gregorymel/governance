@@ -12,7 +12,7 @@ contract SignatureHelper is Test {
 
     error PrevCallerIsAlreadySet();
 
-    function _generatePrivateKey(string memory salt) internal pure returns (uint256) {
+    function _generatePrivateKey(string memory salt) internal pure virtual returns (uint256) {
         return uint256(keccak256(abi.encodePacked(salt)));
     }
 
