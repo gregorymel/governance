@@ -101,6 +101,10 @@ contract NewChainDeploySuiteL2 is Test, GlobalSetup {
 
         _setUpInstanceManager();
 
+        _setCoreContracts();
+        _setAdapters();
+        _setPriceFeeds();
+
         // activate instance
         CrossChainCall[] memory calls = new CrossChainCall[](1);
         calls[0] = _generateActivateCall(0, instanceOwner, TREASURY, WETH, GEAR);

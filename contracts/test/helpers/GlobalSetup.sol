@@ -138,11 +138,7 @@ struct DeploySystemContractCall {
 contract GlobalSetup is Test, InstanceManagerHelper {
     UploadableContract[] internal contractsToUpload;
 
-    constructor() {
-        _setCoreContracts();
-        _setAdapters();
-        _setPriceFeeds();
-    }
+    constructor() {}
 
     function _setUpGlobalContracts() internal {
         // _setUpInstanceManager();

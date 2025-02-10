@@ -90,6 +90,10 @@ contract NewChainDeploySuite is Test, GlobalSetup {
             vm.chainId(1);
         }
 
+        _setCoreContracts();
+        _setAdapters();
+        _setPriceFeeds();
+
         _setUpInstanceManager();
         _setUpGlobalContracts();
 
