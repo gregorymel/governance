@@ -49,7 +49,7 @@ struct CreditManagerParams {
 
 contract CreditFactory is AbstractFactory, ICreditFactory {
     /// @notice Contract version
-    uint256 public constant override version = 3_10;
+    // uint256 public constant override version = 3_10;
 
     /// @notice Contract type
     bytes32 public constant override contractType = AP_CREDIT_FACTORY;
@@ -69,6 +69,10 @@ contract CreditFactory is AbstractFactory, ICreditFactory {
     constructor(address addressProvider_) AbstractFactory(addressProvider_) {
         botList = _getAddressOrRevert(AP_BOT_LIST, NO_VERSION_CONTROL);
         weth = _tryGetAddress(AP_WETH_TOKEN, NO_VERSION_CONTROL);
+    }
+
+    function version() public pure virtual override returns (uint256) {
+        return 3_10;
     }
 
     // ---------- //
@@ -235,7 +239,7 @@ contract CreditFactory is AbstractFactory, ICreditFactory {
 
         return _deployLatestPatch({
             contractType: _getContractType(DOMAIN_ACCOUNT_FACTORY, params.postfix),
-            minorVersion: version,
+            minorVersion: version(),
             constructorParams: params.constructorParams,
             salt: keccak256(abi.encode(params.salt, marketConfigurator))
         });
@@ -248,7 +252,7 @@ contract CreditFactory is AbstractFactory, ICreditFactory {
     {
         return _computeAddressLatestPatch({
             contractType: _getContractType(DOMAIN_ACCOUNT_FACTORY, params.postfix),
-            minorVersion: version,
+            minorVersion: version(),
             constructorParams: params.constructorParams,
             salt: keccak256(abi.encode(params.salt, marketConfigurator)),
             deployer: address(this)
@@ -266,7 +270,7 @@ contract CreditFactory is AbstractFactory, ICreditFactory {
             _buildCreditManagerConstructorParams(marketConfigurator, pool, accountFactory, params);
         return _deployLatestPatch({
             contractType: _getContractType(DOMAIN_CREDIT_MANAGER, postfix),
-            minorVersion: version,
+            minorVersion: version(),
             constructorParams: constructorParams,
             salt: bytes32(bytes20(marketConfigurator))
         });
@@ -283,7 +287,7 @@ contract CreditFactory is AbstractFactory, ICreditFactory {
             _buildCreditManagerConstructorParams(marketConfigurator, pool, accountFactory, params);
         return _computeAddressLatestPatch({
             contractType: _getContractType(DOMAIN_CREDIT_MANAGER, postfix),
-            minorVersion: version,
+            minorVersion: version(),
             constructorParams: constructorParams,
             salt: bytes32(bytes20(marketConfigurator)),
             deployer: address(this)
@@ -319,7 +323,7 @@ contract CreditFactory is AbstractFactory, ICreditFactory {
 
         return _deployLatestPatch({
             contractType: AP_CREDIT_CONFIGURATOR,
-            minorVersion: version,
+            minorVersion: version(),
             constructorParams: constructorParams,
             salt: bytes32(bytes20(marketConfigurator))
         });
@@ -351,7 +355,7 @@ contract CreditFactory is AbstractFactory, ICreditFactory {
 
         return _deployLatestPatch({
             contractType: AP_CREDIT_FACADE,
-            minorVersion: version,
+            minorVersion: version(),
             constructorParams: constructorParams,
             salt: bytes32(bytes20(marketConfigurator))
         });
@@ -366,7 +370,7 @@ contract CreditFactory is AbstractFactory, ICreditFactory {
 
         return _deployLatestPatch({
             contractType: _getContractType(DOMAIN_ADAPTER, params.postfix),
-            minorVersion: version,
+            minorVersion: version(),
             constructorParams: params.constructorParams,
             salt: keccak256(abi.encode(params.salt, marketConfigurator))
         });
