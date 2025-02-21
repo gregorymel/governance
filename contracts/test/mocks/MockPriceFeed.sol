@@ -54,4 +54,8 @@ contract MockPriceFeed is IPriceFeed {
     function skipPriceCheck() external pure returns (bool) {
         return false;
     }
+
+    function serialize() external view returns (bytes memory) {
+        return "";
+    }
 }

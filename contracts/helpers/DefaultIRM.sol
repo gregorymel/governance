@@ -17,4 +17,8 @@ contract DefaultIRM is IInterestRateModel {
     function availableToBorrow(uint256, uint256) external pure override returns (uint256) {
         return 0;
     }
+
+    function serialize() external pure returns (bytes memory) {
+        return "";
+    }
 }
