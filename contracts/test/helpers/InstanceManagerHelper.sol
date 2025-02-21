@@ -45,7 +45,7 @@ contract InstanceManagerHelper is BCRHelpers, CCGHelper {
         // Generate random private keys and derive addresses
 
         // Deploy InstanceManager owned by multisig
-        instanceManager = new InstanceManager{salt: bytes32("SALT")}(address(multisig));
+        instanceManager = new InstanceManager{salt: _SALT()}(address(multisig));
         bytecodeRepository = instanceManager.bytecodeRepository();
     }
 
@@ -65,7 +65,7 @@ contract InstanceManagerHelper is BCRHelpers, CCGHelper {
         bytes memory creationCode = abi.encodePacked(type(InstanceManager).creationCode, abi.encode(multisig));
 
         return Create2.computeAddress(
-            bytes32("SALT"), keccak256(creationCode), address(0x4e59b44847b379578588920cA78FbF26c0B4956C)
+            bytes32(_SALT()), keccak256(creationCode), address(0x4e59b44847b379578588920cA78FbF26c0B4956C)
         );
     }
 

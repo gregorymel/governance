@@ -47,6 +47,10 @@ contract CCGHelper is SignatureHelper {
         console.log("DAO:", dao);
     }
 
+    function _SALT() internal pure virtual returns (bytes32) {
+        return bytes32("SALT");
+    }
+
     function _setUpCCG() internal {
         // Deploy initial contracts
         address[] memory initialSigners = new address[](2);
@@ -54,7 +58,7 @@ contract CCGHelper is SignatureHelper {
         initialSigners[1] = signer2;
 
         // Deploy CrossChainMultisig with 2 signers and threshold of 2
-        multisig = new CrossChainMultisig{salt: "SALT"}(
+        multisig = new CrossChainMultisig{salt: _SALT()}(
             initialSigners,
             2, // threshold
             dao
@@ -83,7 +87,7 @@ contract CCGHelper is SignatureHelper {
             abi.encodePacked(type(CrossChainMultisig).creationCode, abi.encode(initialSigners, 2, dao));
 
         return Create2.computeAddress(
-            bytes32("SALT"), keccak256(creationCode), address(0x4e59b44847b379578588920cA78FbF26c0B4956C)
+            bytes32(_SALT()), keccak256(creationCode), address(0x4e59b44847b379578588920cA78FbF26c0B4956C)
         );
     }
 
