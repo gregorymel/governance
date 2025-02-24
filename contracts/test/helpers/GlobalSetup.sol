@@ -36,12 +36,13 @@ import {
     AP_INTEREST_RATE_MODEL_LINEAR,
     AP_RATE_KEEPER_TUMBLER,
     AP_RATE_KEEPER_GAUGE,
+    AP_LOSS_POLICY_ALIASED,
     AP_LOSS_POLICY_DEFAULT,
     AP_CREDIT_MANAGER,
     AP_CREDIT_FACADE,
     AP_CREDIT_CONFIGURATOR
 } from "../../libraries/ContractLiterals.sol";
-import {SignedProposal, Bytecode} from "../../interfaces/Types.sol";
+import {SignedBatch, Bytecode} from "../../interfaces/Types.sol";
 
 import {CreditFactory} from "../../factories/CreditFactory.sol";
 import {InterestRateModelFactory} from "../../factories/InterestRateModelFactory.sol";
@@ -59,6 +60,7 @@ import {TreasurySplitter} from "../../market/TreasurySplitter.sol";
 
 // Core contracts
 import {BotListV3} from "@gearbox-protocol/core-v3/contracts/core/BotListV3.sol";
+import {AliasedLossPolicyV3} from "@gearbox-protocol/core-v3/contracts/core/AliasedLossPolicyV3.sol";
 import {GearStakingV3} from "@gearbox-protocol/core-v3/contracts/core/GearStakingV3.sol";
 import {PoolV3} from "@gearbox-protocol/core-v3/contracts/pool/PoolV3.sol";
 import {PoolQuotaKeeperV3} from "@gearbox-protocol/core-v3/contracts/pool/PoolQuotaKeeperV3.sol";
@@ -67,7 +69,6 @@ import {PriceOracleV3} from "@gearbox-protocol/core-v3/contracts/core/PriceOracl
 import {LinearInterestRateModelV3} from "@gearbox-protocol/core-v3/contracts/pool/LinearInterestRateModelV3.sol";
 import {TumblerV3} from "@gearbox-protocol/core-v3/contracts/pool/TumblerV3.sol";
 import {GaugeV3} from "@gearbox-protocol/core-v3/contracts/pool/GaugeV3.sol";
-import {DefaultLossPolicy} from "../../helpers/DefaultLossPolicy.sol";
 import {CreditManagerV3} from "@gearbox-protocol/core-v3/contracts/credit/CreditManagerV3.sol";
 import {CreditFacadeV3} from "@gearbox-protocol/core-v3/contracts/credit/CreditFacadeV3.sol";
 import {CreditConfiguratorV3} from "@gearbox-protocol/core-v3/contracts/credit/CreditConfiguratorV3.sol";
@@ -146,7 +147,7 @@ contract GlobalSetup is Test, InstanceManagerHelper {
         CrossChainCall[] memory calls = new CrossChainCall[](1);
         calls[0] = _generateAddAuditorCall(auditor, "Initial Auditor");
 
-        _submitAndSignOrExecuteProposal("Add Auditor", calls);
+        _submitAndSignOrExecuteBatch("Add Auditor", calls);
 
         uint256 len = contractsToUpload.length;
 
@@ -159,7 +160,7 @@ contract GlobalSetup is Test, InstanceManagerHelper {
             calls[i] = _generateAllowSystemContractCall(bytecodeHash);
         }
 
-        _submitAndSignOrExecuteProposal("Allow system contracts", calls);
+        _submitAndSignOrExecuteBatch("Allow system contracts", calls);
 
         DeploySystemContractCall[10] memory deployCalls = [
             DeploySystemContractCall({contractType: AP_BOT_LIST, version: 3_10, saveVersion: false}),
@@ -183,7 +184,7 @@ contract GlobalSetup is Test, InstanceManagerHelper {
             );
         }
 
-        _submitAndSignOrExecuteProposal("System contracts", calls);
+        _submitAndSignOrExecuteBatch("System contracts", calls);
     }
 
     function _attachGlobalContracts() internal {
@@ -334,8 +335,8 @@ contract GlobalSetup is Test, InstanceManagerHelper {
 
         contractsToUpload.push(
             UploadableContract({
-                initCode: type(DefaultLossPolicy).creationCode,
-                contractType: AP_LOSS_POLICY_DEFAULT,
+                initCode: type(AliasedLossPolicyV3).creationCode,
+                contractType: AP_LOSS_POLICY_ALIASED,
                 version: 3_10
             })
         );

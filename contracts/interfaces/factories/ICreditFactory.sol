@@ -6,19 +6,16 @@ pragma solidity ^0.8.23;
 import {Call, DeployResult} from "../Types.sol";
 import {IFactory} from "./IFactory.sol";
 
-struct CreditFacadeParams {
-    address degenNFT;
-    bool expirable;
-    bool migrateBotList;
-}
-
 interface ICreditFactory is IFactory {
     function deployCreditSuite(address pool, bytes calldata encodedParams) external returns (DeployResult memory);
 
-    function computeCreditManagerAddress(address marketConfigurator, address pool, bytes calldata encodedParams)
-        external
-        view
-        returns (address);
+    function computeCreditManagerAddress(
+        address marketConfigurator,
+        address pool,
+        address underlying,
+        address priceOracle,
+        bytes calldata encodedParams
+    ) external view returns (address);
 
     // ------------ //
     // CREDIT HOOKS //

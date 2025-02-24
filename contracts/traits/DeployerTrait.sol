@@ -15,10 +15,7 @@ abstract contract DeployerTrait is IDeployerTrait {
     using LibString for string;
     using LibString for bytes32;
 
-    /// @notice Address of the address provider
     address public immutable override addressProvider;
-
-    /// @notice Address of the bytecode repository
     address public immutable override bytecodeRepository;
 
     constructor(address addressProvider_) {
@@ -26,16 +23,12 @@ abstract contract DeployerTrait is IDeployerTrait {
         bytecodeRepository = _getAddressOrRevert(AP_BYTECODE_REPOSITORY, NO_VERSION_CONTROL);
     }
 
-    function _getAddressOrRevert(bytes32 key, uint256 version) internal view returns (address) {
-        return IAddressProvider(addressProvider).getAddressOrRevert(key, version);
+    function _getAddress(bytes32 key, uint256 version) internal view returns (address) {
+        return IAddressProvider(addressProvider).getAddress(key, version);
     }
 
-    function _tryGetAddress(bytes32 key, uint256 version) internal view returns (address) {
-        try IAddressProvider(addressProvider).getAddressOrRevert(key, version) returns (address result) {
-            return result;
-        } catch {
-            return address(0);
-        }
+    function _getAddressOrRevert(bytes32 key, uint256 version) internal view returns (address) {
+        return IAddressProvider(addressProvider).getAddressOrRevert(key, version);
     }
 
     function _getContractType(bytes32 domain, bytes32 postfix) internal pure returns (bytes32) {

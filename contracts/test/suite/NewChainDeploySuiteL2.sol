@@ -43,7 +43,7 @@ import {
     AP_CREDIT_CONFIGURATOR,
     NO_VERSION_CONTROL
 } from "../../libraries/ContractLiterals.sol";
-import {SignedProposal, Bytecode} from "../../interfaces/Types.sol";
+import {SignedBatch, Bytecode} from "../../interfaces/Types.sol";
 
 import {CreditFactory} from "../../factories/CreditFactory.sol";
 import {InterestRateModelFactory} from "../../factories/InterestRateModelFactory.sol";
@@ -108,7 +108,7 @@ contract NewChainDeploySuiteL2 is Test, GlobalSetup {
         // activate instance
         CrossChainCall[] memory calls = new CrossChainCall[](1);
         calls[0] = _generateActivateCall(0, instanceOwner, TREASURY, WETH, GEAR);
-        _submitAndSignOrExecuteProposal("Activate instance", calls);
+        _submitAndSignOrExecuteBatch("Activate instance", calls);
 
         _setUpGlobalContracts();
 

@@ -1,9 +1,28 @@
 // SPDX-License-Identifier: BUSL-1.1
 // Gearbox Protocol. Generalized leverage for DeFi protocols
 // (c) Gearbox Foundation, 2024.
+pragma solidity ^0.8.23;
 
-import {CreditFacadeParams} from "./ICreditFactory.sol";
 import {DeployParams} from "../Types.sol";
+
+struct CreditManagerParams {
+    uint8 maxEnabledTokens;
+    uint16 feeInterest;
+    uint16 feeLiquidation;
+    uint16 liquidationPremium;
+    uint16 feeLiquidationExpired;
+    uint16 liquidationPremiumExpired;
+    uint128 minDebt;
+    uint128 maxDebt;
+    string name;
+    DeployParams accountFactoryParams;
+}
+
+struct CreditFacadeParams {
+    address degenNFT;
+    bool expirable;
+    bool migrateBotList;
+}
 
 interface ICreditConfigureActions {
     function upgradeCreditConfigurator() external;
